@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>노랭이 단어장</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .controls {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        select {
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .word-list {
+            padding: 30px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .day-group {
+            margin-bottom: 30px;
+        }
+        
+        .day-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .word-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        
+        .word-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .word-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .word-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #667eea;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .word-title:hover {
+            color: #5568d3;
+            text-decoration: underline;
+        }
+        
+        .word-title.no-audio {
+            color: #adb5bd;
+            cursor: default;
+        }
+        
+        .word-title.no-audio:hover {
+            text-decoration: none;
+        }
+        
+        .word-meaning {
+            color: #495057;
+            font-size: 1.1em;
+            margin-bottom: 12px;
+        }
+        
+        .word-example {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            color: #495057;
+            font-style: italic;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+        
+        .word-example:hover {
+            background: #e7f1ff;
+            border-left-color: #5568d3;
+        }
+        
+        .word-example.no-audio {
+            cursor: default;
+            background: #f1f3f5;
+            border-left-color: #adb5bd;
+        }
+        
+        .word-example.no-audio:hover {
+            background: #f1f3f5;
+        }
+        
+        .example-label {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        
+        .now-playing {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            min-width: 300px;
+            animation: slideIn 0.3s;
+            z-index: 1000;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .now-playing h3 {
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .now-playing .content {
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        
+        .status {
+            padding: 15px 30px;
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .now-playing {
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 노랭이 단어장</h1>
+            <p>단어를 클릭하면 발음이, 예문을 클릭하면 예문 소리가 들립니다!</p>
+        </div>
+        
+        <div class="controls">
+            <select id="dayFilter" onchange="filterByDay()">
+                <option value="all">전체 보기</option>
+            </select>
+            <button class="btn btn-primary" onclick="playAll()" id="playAllBtn">▶️ 순환 재생</button>
+            <button class="btn btn-secondary hidden" onclick="stopPlayAll()" id="stopBtn">⏹️ 정지</button>
+            <label>
+                <input type="checkbox" id="repeatMode"> 반복 재생
+            </label>
+        </div>
+        
+        <div class="word-list" id="wordList">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>구글 시트에서 데이터를 불러오는 중...</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="now-playing hidden" id="nowPlaying">
+        <h3>🎵 재생 중</h3>
+        <div class="content" id="nowPlayingText"></div>
+    </div>
+    
+    <audio id="audioPlayer"></audio>
+    
+    <script>
+// ==========================================
+// 🔐 비밀번호 설정 (여기를 수정하세요!)
+// ==========================================
+const PASSWORD = "1124";  // ← 원하는 비밀번호로 변경하세요!
+
+const SHEET_ID = '1pvSsYxafa4T0Zh9A7itRgojefRm-yjUpzZQkSsSSMSo';
+const SHEET_NAME = '시트1';
+const MP3_BASE_URL = './mp3/'; // GitHub Pages의 mp3 폴더 경로
+
+let wordsData = [];
+let currentPlayIndex = 0;
+let isPlayingAll = false;
+let currentAudio = null;
+
+// 페이지 로드 시 비밀번호 확인 후 데이터 가져오기
+window.onload = function() {
+    checkPassword();
+};
+
+function checkPassword() {
+    const storedPassword = sessionStorage.getItem('vocab_auth');
+    
+    if (storedPassword === PASSWORD) {
+        loadGoogleSheetData();
+        return;
+    }
+    
+    const userPassword = prompt("🔐 비밀번호를 입력하세요:");
+    
+    if (userPassword === PASSWORD) {
+        sessionStorage.setItem('vocab_auth', PASSWORD);
+        loadGoogleSheetData();
+    } else if (userPassword === null) {
+        document.body.innerHTML = '<div style="text-align:center; padding:50px; font-size:20px;">❌ 접근이 취소되었습니다.</div>';
+    } else {
+        alert("❌ 비밀번호가 틀렸습니다!");
+        document.body.innerHTML = '<div style="text-align:center; padding:50px; font-size:20px;">❌ 비밀번호가 틀렸습니다. 페이지를 새로고침하여 다시 시도하세요.</div>';
+    }
+}
+
+async function loadGoogleSheetData() {
+    try {
+        const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
+        
+        const response = await fetch(url);
+        const text = await response.text();
+        
+        // Google의 JSON 응답 파싱
+        const json = JSON.parse(text.substr(47).slice(0, -2));
+        const rows = json.table.rows;
+        
+        wordsData = [];
+        
+        // 첫 행(헤더) 건너뛰고 데이터 파싱
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i].c;
+            if (!row || !row[1] || !row[1].v) continue; // 단어가 없으면 건너뛰기
+            
+            const wordItem = {
+                day: row[0]?.v || '',
+                word: row[1]?.v || '',
+                meaning: row[2]?.v || '',
+                example1: row[3]?.v || '',
+                example2: row[4]?.v || '',
+                word_start: row[5]?.v || null,
+                word_end: row[6]?.v || null,
+                example1_start: row[7]?.v || null,
+                example1_end: row[8]?.v || null,
+                example2_start: row[9]?.v || null,
+                example2_end: row[10]?.v || null,
+                mp3_file: row[11]?.v || ''
+            };
+            
+            wordsData.push(wordItem);
+        }
+        
+        console.log(`${wordsData.length}개 단어 로드 완료!`);
+        displayWords();
+        
+    } catch (error) {
+        console.error('데이터 로드 실패:', error);
+        document.getElementById('wordList').innerHTML = 
+            '<div class="status">❌ 데이터를 불러오는데 실패했습니다.<br>구글 시트가 "링크가 있는 모든 사용자"로 공유되어 있는지 확인해주세요.</div>';
+    }
+}
+
+function displayWords() {
+    const wordListDiv = document.getElementById('wordList');
+    const dayFilter = document.getElementById('dayFilter');
+    
+    // Day 필터 옵션 추가
+    const days = [...new Set(wordsData.map(w => w.day))];
+    days.sort((a, b) => {
+        const numA = parseInt(a.replace('Day', ''));
+        const numB = parseInt(b.replace('Day', ''));
+        return numA - numB;
+    });
+    
+    dayFilter.innerHTML = '<option value="all">전체 보기</option>';
+    days.forEach(day => {
+        dayFilter.innerHTML += `<option value="${day}">${day}</option>`;
+    });
+    
+    filterByDay();
+}
+
+function filterByDay() {
+    const wordListDiv = document.getElementById('wordList');
+    const selectedDay = document.getElementById('dayFilter').value;
+    
+    let filteredWords = wordsData;
+    if (selectedDay !== 'all') {
+        filteredWords = wordsData.filter(w => w.day === selectedDay);
+    }
+    
+    // Day별로 그룹화
+    const groupedByDay = {};
+    filteredWords.forEach(word => {
+        if (!groupedByDay[word.day]) {
+            groupedByDay[word.day] = [];
+        }
+        groupedByDay[word.day].push(word);
+    });
+    
+    let html = '';
+    Object.keys(groupedByDay).sort((a, b) => {
+        const numA = parseInt(a.replace('Day', ''));
+        const numB = parseInt(b.replace('Day', ''));
+        return numA - numB;
+    }).forEach(day => {
+        html += `<div class="day-group">`;
+        html += `<div class="day-header">${day}</div>`;
+        
+        groupedByDay[day].forEach((word, idx) => {
+            const wordIndex = wordsData.indexOf(word);
+            const hasWordAudio = word.word_start !== null && word.word_end !== null;
+            const hasExample1Audio = word.example1_start !== null && word.example1_end !== null;
+            const hasExample2Audio = word.example2_start !== null && word.example2_end !== null;
+            
+            html += `<div class="word-card">`;
+            html += `<div class="word-header">`;
+            html += `<div class="word-title ${!hasWordAudio ? 'no-audio' : ''}" 
+                     ${hasWordAudio ? `onclick="playWord(${wordIndex})"` : ''}>
+                     ${word.word}
+                     ${!hasWordAudio ? ' 🔇' : ''}
+                   </div>`;
+            html += `</div>`;
+            html += `<div class="word-meaning">${word.meaning}</div>`;
+            
+            if (word.example1) {
+                html += `<div class="example-label">예문 1</div>`;
+                html += `<div class="word-example ${!hasExample1Audio ? 'no-audio' : ''}" 
+                         ${hasExample1Audio ? `onclick="playExample(${wordIndex}, 1)"` : ''}>
+                         ${word.example1}
+                         ${!hasExample1Audio ? ' 🔇' : ''}
+                       </div>`;
+            }
+            
+            if (word.example2) {
+                html += `<div class="example-label">예문 2</div>`;
+                html += `<div class="word-example ${!hasExample2Audio ? 'no-audio' : ''}" 
+                         ${hasExample2Audio ? `onclick="playExample(${wordIndex}, 2)"` : ''}>
+                         ${word.example2}
+                         ${!hasExample2Audio ? ' 🔇' : ''}
+                       </div>`;
+            }
+            
+            html += `</div>`;
+        });
+        
+        html += `</div>`;
+    });
+    
+    if (html === '') {
+        html = '<div class="status">단어가 없습니다</div>';
+    }
+    
+    wordListDiv.innerHTML = html;
+}
+
+function playWord(index) {
+    const word = wordsData[index];
+    if (!word.word_start || !word.word_end) {
+        alert('이 단어는 아직 타임스탬프가 입력되지 않았습니다.');
+        return;
+    }
+    playAudio(word.mp3_file, word.word_start, word.word_end, `단어: ${word.word}`);
+}
+
+function playExample(index, exampleNum) {
+    const word = wordsData[index];
+    if (exampleNum === 1) {
+        if (!word.example1_start || !word.example1_end) {
+            alert('이 예문은 아직 타임스탬프가 입력되지 않았습니다.');
+            return;
+        }
+        playAudio(word.mp3_file, word.example1_start, word.example1_end, `예문 1: ${word.example1}`);
+    } else {
+        if (!word.example2_start || !word.example2_end) {
+            alert('이 예문은 아직 타임스탬프가 입력되지 않았습니다.');
+            return;
+        }
+        playAudio(word.mp3_file, word.example2_start, word.example2_end, `예문 2: ${word.example2}`);
+    }
+}
+
+function playAudio(filename, startTime, endTime, displayText) {
+    const audioPlayer = document.getElementById('audioPlayer');
+    const nowPlaying = document.getElementById('nowPlaying');
+    const nowPlayingText = document.getElementById('nowPlayingText');
+    
+    audioPlayer.src = MP3_BASE_URL + filename;
+    audioPlayer.currentTime = startTime;
+    
+    nowPlayingText.textContent = displayText;
+    nowPlaying.classList.remove('hidden');
+    
+    const playPromise = audioPlayer.play();
+    
+    if (playPromise !== undefined) {
+        playPromise.catch(error => {
+            console.error('재생 오류:', error);
+            alert('MP3 파일을 찾을 수 없습니다. GitHub에 mp3 폴더와 파일들이 업로드되어 있는지 확인해주세요.');
+        });
+    }
+    
+    // 종료 시간에 정지
+    const checkTime = setInterval(() => {
+        if (audioPlayer.currentTime >= endTime) {
+            audioPlayer.pause();
+            clearInterval(checkTime);
+            
+            setTimeout(() => {
+                nowPlaying.classList.add('hidden');
+            }, 1000);
+        }
+    }, 100);
+    
+    currentAudio = { interval: checkTime };
+}
+
+function playAll() {
+    const repeatMode = document.getElementById('repeatMode').checked;
+    isPlayingAll = true;
+    currentPlayIndex = 0;
+    
+    document.getElementById('playAllBtn').classList.add('hidden');
+    document.getElementById('stopBtn').classList.remove('hidden');
+    
+    playNext();
+}
+
+function playNext() {
+    if (!isPlayingAll) return;
+    
+    const selectedDay = document.getElementById('dayFilter').value;
+    let playableWords = wordsData.filter(w => 
+        w.word_start !== null && w.word_end !== null &&
+        (selectedDay === 'all' || w.day === selectedDay)
+    );
+    
+    if (playableWords.length === 0) {
+        alert('재생 가능한 단어가 없습니다.');
+        stopPlayAll();
+        return;
+    }
+    
+    if (currentPlayIndex >= playableWords.length) {
+        const repeatMode = document.getElementById('repeatMode').checked;
+        if (repeatMode) {
+            currentPlayIndex = 0;
+        } else {
+            stopPlayAll();
+            return;
+        }
+    }
+    
+    const word = playableWords[currentPlayIndex];
+    const audioPlayer = document.getElementById('audioPlayer');
+    const nowPlaying = document.getElementById('nowPlaying');
+    const nowPlayingText = document.getElementById('nowPlayingText');
+    
+    audioPlayer.src = MP3_BASE_URL + word.mp3_file;
+    audioPlayer.currentTime = word.word_start;
+    
+    nowPlayingText.textContent = `${word.word} - ${word.meaning}`;
+    nowPlaying.classList.remove('hidden');
+    
+    audioPlayer.play();
+    
+    const checkTime = setInterval(() => {
+        if (audioPlayer.currentTime >= word.word_end) {
+            audioPlayer.pause();
+            clearInterval(checkTime);
+            
+            // 예문1이 있으면 재생
+            if (word.example1 && word.example1_start !== null && word.example1_end !== null) {
+                setTimeout(() => playExampleInSequence(word, 1), 500);
+            }
+            // 예문2가 있으면 재생
+            else if (word.example2 && word.example2_start !== null && word.example2_end !== null) {
+                setTimeout(() => playExampleInSequence(word, 2), 500);
+            }
+            else {
+                currentPlayIndex++;
+                setTimeout(playNext, 800);
+            }
+        }
+    }, 100);
+}
+
+function playExampleInSequence(word, exampleNum) {
+    if (!isPlayingAll) return;
+    
+    const audioPlayer = document.getElementById('audioPlayer');
+    const nowPlayingText = document.getElementById('nowPlayingText');
+    
+    let startTime, endTime, text;
+    
+    if (exampleNum === 1) {
+        startTime = word.example1_start;
+        endTime = word.example1_end;
+        text = word.example1;
+    } else {
+        startTime = word.example2_start;
+        endTime = word.example2_end;
+        text = word.example2;
+    }
+    
+    audioPlayer.currentTime = startTime;
+    nowPlayingText.textContent = text;
+    
+    audioPlayer.play();
+    
+    const checkTime = setInterval(() => {
+        if (audioPlayer.currentTime >= endTime) {
+            audioPlayer.pause();
+            clearInterval(checkTime);
+            
+            // 예문1 후 예문2가 있으면 재생
+            if (exampleNum === 1 && word.example2 && word.example2_start !== null && word.example2_end !== null) {
+                setTimeout(() => playExampleInSequence(word, 2), 500);
+            } else {
+                currentPlayIndex++;
+                setTimeout(playNext, 800);
+            }
+        }
+    }, 100);
+}
+
+function stopPlayAll() {
+    isPlayingAll = false;
+    const audioPlayer = document.getElementById('audioPlayer');
+    audioPlayer.pause();
+    
+    document.getElementById('playAllBtn').classList.remove('hidden');
+    document.getElementById('stopBtn').classList.add('hidden');
+    document.getElementById('nowPlaying').classList.add('hidden');
+}
+    </script>
+</body>
+</html>
